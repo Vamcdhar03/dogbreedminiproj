@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Breed Classification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { margin: 20px; }
+        input[type="submit"] { margin-top: 10px; }
+        .result { margin-top: 20px; font-size: 1.2em; color: green; }
+        .error { margin-top: 20px; font-size: 1.2em; color: red; }
+    </style>
+</head>
+<body>
+    <h1>Dog Breed Classification</h1>
+    <form action="/predict" method="post" enctype="multipart/form-data">
+        <label for="file">Upload an image of a dog:</label>
+        <input type="file" name="file" id="file" accept="image/*" required>
+        <input type="submit" value="Classify">
+    </form>
+
+    <div id="result" class="result"></div>
+    <div id="error" class="error"></div>
+
+    <script>
+        document.querySelector('form').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            resultDiv.textContent = '';
+            errorDiv.textContent = '';
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.breed) {
+                    resultDiv.textContent = `Predicted breed: ${data.breed} (Confidence: ${data.confidence.toFixed(2)})`;
+                } else if (data.error) {
+                    errorDiv.textContent = data.error;
+                }
+            } else {
+                errorDiv.textContent = 'Error occurred during the prediction.';
+            }
+        };
+    </script>
+</body>
+</html>
